@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRONFORGE Fitness Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0A0A;--card:#111111;--elevated:#181818;--red:#E8200A;--red-dark:#a01508;--gold:#C8A04A;--green:#2ECC71;--blue:#3498DB;--text:#E8E8E0;--muted:#999999;--border:#2A2A2A;--nav-bg:rgba(10,10,10,0.88);--shadow:rgba(0,0,0,0.5)}
+html[data-theme="light"]{--bg:#F2F2F0;--card:#FFFFFF;--elevated:#EBEBEB;--red:#D41A06;--red-dark:#a01508;--gold:#A87C28;--green:#1EA85A;--blue:#2176AE;--text:#111111;--muted:#666666;--border:#DEDEDE;--nav-bg:rgba(242,242,240,0.92);--shadow:rgba(0,0,0,0.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;min-height:100vh}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--red);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--red-dark)}
+
+/* NAV */
+#navbar{position:fixed;top:0;left:0;right:0;height:56px;background:var(--nav-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:1000;display:flex;align-items:center;padding:0 24px;gap:24px}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--text);letter-spacing:3px;cursor:pointer;white-space:nowrap}
+.nav-logo span{color:var(--red)}
+.nav-links{display:flex;gap:2px;flex:1;justify-content:center;flex-wrap:wrap}
+.nav-link{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;cursor:pointer;padding:6px 10px;position:relative;transition:color .2s;white-space:nowrap}
+.nav-link:hover{color:var(--text)}
+.nav-link.active{color:var(--text)}
+.nav-link.active::after{content:'';position:absolute;bottom:0;left:10px;right:10px;height:2px;background:var(--red)}
+
+/* MAIN */
+.page-wrap{padding-top:72px;min-height:100vh;padding-bottom:40px}
+.page{display:none;padding:0 24px;max-width:1200px;margin:0 auto}
+.page.active{display:block}
+
+/* HEADINGS */
+h1,h2,h3{font-family:'Bebas Neue',sans-serif;letter-spacing:2px}
+h1{font-size:42px;color:var(--text)}
+h2{font-size:28px;color:var(--text)}
+h3{font-size:20px;color:var(--text)}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--red);margin-bottom:16px;text-transform:uppercase}
+.label{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.muted{color:var(--muted)}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:20px}
+.card-elevated{background:var(--elevated);border:1px solid var(--border);border-radius:4px;padding:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:4px;padding:20px}
+.stat-card .stat-val{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--red);line-height:1}
+.stat-card .stat-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-top:4px}
+
+/* GRID */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.grid-6{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+
+/* BUTTONS */
+.btn{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:none;padding:11px 22px;transition:all .2s;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));display:inline-flex;align-items:center;gap:8px}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{background:#ff2810;box-shadow:0 0 16px rgba(232,32,10,.5)}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border);clip-path:none;border-radius:2px}
+.btn-outline:hover{border-color:var(--red);color:var(--red)}
+.btn-gold{background:var(--gold);color:#000}
+.btn-gold:hover{background:#ddb85a}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-full{width:100%;justify-content:center}
+
+/* INPUTS */
+.input-group{margin-bottom:16px}
+input[type=text],input[type=number],input[type=email],select,textarea{background:var(--elevated);border:1px solid var(--border);color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;padding:10px 14px;border-radius:2px;width:100%;outline:none;transition:border .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--red)}
+select option{background:var(--card);color:var(--text)}
+textarea{resize:vertical;min-height:80px}
+
+/* PROGRESS BARS */
+.progress-bar-wrap{margin-bottom:12px}
+.progress-bar-label{display:flex;justify-content:space-between;margin-bottom:4px;font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.5px}
+.progress-bar{height:8px;background:var(--elevated);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.fill-red{background:linear-gradient(90deg,var(--red-dark),var(--red))}
+.fill-green{background:linear-gradient(90deg,#27ae60,var(--green))}
+.fill-gold{background:linear-gradient(90deg,#a07830,var(--gold))}
+.fill-blue{background:linear-gradient(90deg,#2471a3,var(--blue))}
+
+/* TAGS */
+.tag{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:2px;display:inline-block}
+.tag-red{background:rgba(232,32,10,.15);color:var(--red);border:1px solid rgba(232,32,10,.3)}
+.tag-gold{background:rgba(200,160,74,.15);color:var(--gold);border:1px solid rgba(200,160,74,.3)}
+.tag-green{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3)}
+.tag-blue{background:rgba(52,152,219,.15);color:var(--blue);border:1px solid rgba(52,152,219,.3)}
+.tag-muted{background:rgba(153,153,153,.1);color:var(--muted);border:1px solid var(--border)}
+
+/* TOAST */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px}
+.toast{background:var(--elevated);border:1px solid var(--border);border-left:3px solid var(--red);padding:12px 20px;font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.5px;border-radius:2px;transform:translateX(120%);transition:transform .35s cubic-bezier(.4,0,.2,1);min-width:240px;max-width:320px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.toast.show{transform:translateX(0)}
+.toast.green{border-left-color:var(--green)}
+.toast.gold{border-left-color:var(--gold)}
+
+/* SETUP WIZARD */
+.wizard-dots{display:flex;gap:10px;justify-content:center;margin-bottom:32px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .3s}
+.dot.active{background:var(--red)}
+.dot.done{background:var(--gold)}
+.goal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.goal-card{background:var(--elevated);border:1px solid var(--border);border-radius:4px;padding:20px;text-align:center;cursor:pointer;transition:all .2s}
+.goal-card:hover,.goal-card.selected{border-color:var(--red);background:rgba(232,32,10,.08)}
+.goal-card .emoji{font-size:28px;margin-bottom:8px}
+.goal-card .goal-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px}
+.exp-btns{display:flex;gap:12px;margin-bottom:20px}
+.exp-btn{flex:1;padding:12px;background:var(--elevated);border:1px solid var(--border);color:var(--text);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s}
+.exp-btn.selected,.exp-btn:hover{border-color:var(--red);background:rgba(232,32,10,.08);color:var(--red)}
+
+/* CALENDAR MINI */
+.mini-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px}
+.mini-cal-head{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:center;padding:4px 0}
+.mini-day{aspect-ratio:1;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:600;cursor:pointer;transition:all .2s}
+.mini-day.rest{background:rgba(42,42,42,.3);color:var(--muted)}
+.mini-day.scheduled{background:rgba(232,32,10,.25);color:var(--red)}
+.mini-day.done{background:rgba(46,204,113,.25);color:var(--green)}
+.mini-day.missed{background:rgba(160,21,8,.25);color:#a01508}
+.mini-day.today{outline:2px solid var(--red);outline-offset:1px}
+.mini-day.empty{background:transparent}
+
+/* TYPEWRITER OUTPUT */
+.typewriter-output{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:20px;font-family:'Barlow Condensed',sans-serif;font-size:15px;line-height:1.7;white-space:pre-wrap;min-height:200px;max-height:520px;overflow-y:auto;letter-spacing:.3px}
+.cursor-blink{display:inline-block;width:2px;height:16px;background:var(--red);margin-left:2px;animation:blink .7s step-end infinite;vertical-align:text-bottom}
+@keyframes blink{50%{opacity:0}}
+
+/* CHECKLIST */
+.check-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--elevated);border:1px solid var(--border);border-radius:2px;margin-bottom:8px;cursor:pointer;transition:all .2s}
+.check-item:hover{border-color:var(--border)}
+.check-item.done{opacity:.5}
+.check-item.done .check-name{text-decoration:line-through;color:var(--muted)}
+.check-box{width:20px;height:20px;border:2px solid var(--border);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.check-item.done .check-box{background:var(--green);border-color:var(--green)}
+.check-name{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:500;letter-spacing:.5px;flex:1}
+.check-detail{font-size:12px;color:var(--muted);font-family:'Barlow Condensed',sans-serif}
+
+/* EXERCISE CARDS */
+.exercise-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:16px;transition:all .2s;cursor:default}
+.exercise-card:hover{border-color:var(--red)}
+.ex-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--text);margin-bottom:6px}
+.ex-desc{font-size:13px;color:var(--muted);line-height:1.5}
+.filter-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.filter-btn{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;padding:7px 14px;background:var(--elevated);border:1px solid var(--border);color:var(--muted);border-radius:2px;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{background:rgba(232,32,10,.1);border-color:var(--red);color:var(--red)}
+
+/* PRESET CARDS */
+.preset-card{background:var(--elevated);border:1px solid var(--border);border-radius:4px;padding:20px;cursor:pointer;transition:all .2s;text-align:center}
+.preset-card:hover{border-color:var(--red);background:rgba(232,32,10,.06)}
+.preset-icon{font-size:28px;margin-bottom:8px}
+.preset-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px}
+
+/* FULL CALENDAR */
+.full-cal{width:100%}
+.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.cal-nav{background:var(--elevated);border:1px solid var(--border);color:var(--text);font-size:18px;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:2px;transition:all .2s}
+.cal-nav:hover{border-color:var(--red);color:var(--red)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-day-head{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:center;padding:8px 4px}
+.cal-day{min-height:70px;background:var(--elevated);border:1px solid var(--border);border-radius:2px;padding:6px;cursor:pointer;transition:all .2s;position:relative}
+.cal-day:hover{border-color:var(--red)}
+.cal-day.empty{background:transparent;border-color:transparent;cursor:default}
+.cal-day.today{border-color:var(--red)}
+.cal-day-num{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--muted)}
+.cal-day.today .cal-day-num{color:var(--red)}
+.cal-badge{font-size:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;padding:2px 5px;border-radius:2px;margin-top:4px;display:inline-block}
+.badge-sched{background:rgba(232,32,10,.2);color:var(--red)}
+.badge-done{background:rgba(46,204,113,.2);color:var(--green)}
+.badge-missed{background:rgba(160,21,8,.2);color:#a01508}
+.badge-rest{background:rgba(42,42,42,.3);color:var(--muted)}
+
+/* BAR CHART */
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:160px;padding:0 4px;margin-top:12px}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{width:100%;background:linear-gradient(0deg,var(--red-dark),var(--red));border-radius:2px 2px 0 0;transition:height .5s ease;min-height:2px;position:relative}
+.bar-val{font-size:10px;font-family:'Barlow Condensed',sans-serif;color:var(--text);text-align:center}
+.bar-date{font-size:9px;font-family:'Barlow Condensed',sans-serif;color:var(--muted);text-align:center;margin-top:2px;writing-mode:vertical-lr;transform:rotate(180deg);height:40px;line-height:1}
+
+/* EXPENSE LOG */
+.expense-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--elevated);border:1px solid var(--border);border-radius:2px;margin-bottom:8px}
+.expense-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.expense-desc{flex:1}
+.expense-name{font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.3px}
+.expense-cat{font-size:11px;color:var(--muted)}
+.expense-amt{font-family:'Bebas Neue',sans-serif;font-size:20px}
+.expense-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;transition:color .2s;padding:4px}
+.expense-del:hover{color:var(--red)}
+
+/* FOOD LOG */
+.food-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--elevated);border:1px solid var(--border);border-radius:2px;margin-bottom:6px}
+.food-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.3px}
+.food-cal{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gold)}
+.food-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .2s}
+.food-del:hover{color:var(--red)}
+
+/* PB LIST */
+.pb-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--elevated);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:2px;margin-bottom:8px}
+.pb-ex{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;letter-spacing:.5px;flex:1}
+.pb-weight{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold)}
+.pb-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .2s}
+.pb-del:hover{color:var(--red)}
+
+/* SUPP LIST */
+.supp-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--elevated);border:1px solid var(--border);border-radius:2px;margin-bottom:6px}
+.supp-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-size:14px}
+.supp-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;transition:color .2s}
+.supp-del:hover{color:var(--red)}
+
+/* DIVIDERS */
+hr{border:none;border-top:1px solid var(--border);margin:24px 0}
+.spacer{height:16px}
+.spacer-lg{height:32px}
+
+/* THEME TOGGLE */
+#theme-toggle{background:var(--elevated);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+#theme-toggle:hover{border-color:var(--red);transform:rotate(20deg)}
+
+/* HAMBURGER */
+#hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:6px;width:36px;height:36px;margin-left:auto;flex-shrink:0}
+#hamburger span{display:block;height:2px;background:var(--text);border-radius:2px;transition:all .3s}
+#hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+#hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+#hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* MOBILE DRAWER */
+#mobile-menu{position:fixed;top:0;right:0;bottom:0;width:280px;background:var(--card);border-left:1px solid var(--border);z-index:2000;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow-y:auto}
+#mobile-menu.open{transform:translateX(0)}
+#mobile-menu-inner{padding:20px}
+.mob-link{display:flex;align-items:center;gap:12px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:600;letter-spacing:1px;color:var(--muted);text-transform:uppercase;padding:14px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:all .2s;text-decoration:none}
+.mob-link:hover,.mob-link.active{color:var(--text);background:rgba(232,32,10,.07);border-radius:2px;padding-left:16px}
+.mob-link.active{color:var(--red)}
+#mobile-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1999;display:none;backdrop-filter:blur(2px)}
+#mobile-overlay.open{display:block}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+  .grid-3{grid-template-columns:repeat(2,1fr)}
+  .grid-6{grid-template-columns:repeat(3,1fr)}
+  .goal-grid{grid-template-columns:repeat(2,1fr)}
+  .nav-links{gap:0}
+  .nav-link{padding:6px 6px;font-size:11px}
+}
+@media(max-width:600px){
+  #guide-cards{grid-template-columns:1fr !important}
+  .grid-3{grid-template-columns:1fr}
+  .grid-2{grid-template-columns:1fr}
+  .grid-6{grid-template-columns:repeat(2,1fr)}
+  .goal-grid{grid-template-columns:1fr 1fr}
+  .page{padding:0 12px}
+  h1{font-size:32px}
+  .nav-links{display:none}
+  #hamburger{display:flex}
+}
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<nav id="navbar">
+  <div class="nav-logo" onclick="goPage('dashboard')">IRON<span>FORGE</span></div>
+  <div class="nav-links">
+    <span class="nav-link" data-page="dashboard" onclick="goPage('dashboard')">Dashboard</span>
+    <span class="nav-link" data-page="workout" onclick="goPage('workout')">Workout</span>
+    <span class="nav-link" data-page="diet" onclick="goPage('diet')">Diet</span>
+    <span class="nav-link" data-page="progress" onclick="goPage('progress')">Progress</span>
+    <span class="nav-link" data-page="finance" onclick="goPage('finance')">Finance</span>
+    <span class="nav-link" data-page="calendar" onclick="goPage('calendar')">Calendar</span>
+    <span class="nav-link" data-page="exercises" onclick="goPage('exercises')">Exercises</span>
+    <span class="nav-link" data-page="setup" onclick="goPage('setup')">Setup</span>
+    <span class="nav-link" data-page="about" onclick="goPage('about')">Guide</span>
+  </div>
+  <button id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</button>
+  <button id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU DRAWER -->
+<div id="mobile-menu">
+  <div id="mobile-menu-inner">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--red);letter-spacing:3px">IRON<span style="color:var(--gold)">FORGE</span></div>
+      <button onclick="toggleMobileMenu()" style="background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <a class="mob-link" data-page="dashboard" onclick="goPage('dashboard');toggleMobileMenu()">📊 Dashboard</a>
+    <a class="mob-link" data-page="workout" onclick="goPage('workout');toggleMobileMenu()">⚡ Workout</a>
+    <a class="mob-link" data-page="diet" onclick="goPage('diet');toggleMobileMenu()">🥗 Diet</a>
+    <a class="mob-link" data-page="progress" onclick="goPage('progress');toggleMobileMenu()">📈 Progress</a>
+    <a class="mob-link" data-page="finance" onclick="goPage('finance');toggleMobileMenu()">💰 Finance</a>
+    <a class="mob-link" data-page="calendar" onclick="goPage('calendar');toggleMobileMenu()">📅 Calendar</a>
+    <a class="mob-link" data-page="exercises" onclick="goPage('exercises');toggleMobileMenu()">📚 Exercises</a>
+    <a class="mob-link" data-page="setup" onclick="goPage('setup');toggleMobileMenu()">⚙️ Setup</a>
+    <a class="mob-link" data-page="about" onclick="goPage('about');toggleMobileMenu()">❓ Guide</a>
+  </div>
+</div>
+<div id="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
+<div class="page-wrap">
+
+<!-- ===== ABOUT / GUIDE PAGE ===== -->
+<div id="page-about" class="page">
+  <div class="spacer-lg"></div>
+
+  <!-- Hero -->
+  <div style="text-align:center;padding:48px 0 40px;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 40%,rgba(232,32,10,.08) 0%,transparent 70%);pointer-events:none"></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:6px;color:var(--red);margin-bottom:12px">YOUR ALL-IN-ONE OFFLINE GYM COMPANION</div>
+    <h1 style="font-size:64px;line-height:1;margin-bottom:16px">IRON<span style="color:var(--red)">FORGE</span></h1>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Fitness Tracker</div>
+    <p style="font-family:'Barlow Condensed',sans-serif;font-size:18px;color:var(--muted);letter-spacing:.5px;max-width:560px;margin:0 auto;line-height:1.6">A complete fitness tracking system — workout plans, Indian meal planning, body progress, finance tracking, and more. <span style="color:var(--text)">Zero internet required. Everything lives on your device.</span></p>
+    <div style="margin-top:28px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <span class="tag tag-red">100% Offline</span>
+      <span class="tag tag-gold">No Account Needed</span>
+      <span class="tag tag-green">Saves Locally</span>
+      <span class="tag tag-blue">Free Forever</span>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- What is it -->
+  <div style="max-width:800px;margin:0 auto 40px">
+    <div class="section-title">What is IRONFORGE?</div>
+    <p style="font-family:'Barlow',sans-serif;font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:14px">
+      IRONFORGE is a <span style="color:var(--text);font-weight:500">single HTML file</span> that works as a full-featured gym tracker. Open it in any browser — Chrome, Safari, Firefox — and it runs completely offline. No logins, no subscriptions, no data sent anywhere. Everything you track is stored privately in your browser's local storage.
+    </p>
+    <p style="font-family:'Barlow',sans-serif;font-size:15px;color:var(--muted);line-height:1.8">
+      It's designed for <span style="color:var(--text);font-weight:500">Indian gym-goers</span> who want a serious, no-nonsense tool: personalised workout splits, Indian meal plans in your budget, body composition tracking, and expense management — all in one dark, fast, distraction-free interface.
+    </p>
+  </div>
+
+  <!-- Feature cards -->
+  <div class="section-title" style="max-width:800px;margin:0 auto 16px">8 Modules — How to Use Each</div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:800px;margin:0 auto 40px" id="guide-cards">
+
+    <div class="card" style="border-left:3px solid var(--red)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span style="font-size:22px">⚙️</span>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">1. Setup</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--red)">START HERE FIRST</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.65">Fill in your name, age, weight, height, and gender. Pick your <strong style="color:var(--text)">fitness goal</strong> (Lean, Bulky, Strength, etc.) and experience level. Set your gym fee, supplement budget, and how many days a week you train. This powers everything else — your split, macros, and calorie targets are all calculated from this.</p>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--gold)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span style="font-size:22px">📊</span>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">2. Dashboard</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--gold)">YOUR DAILY HQ</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.65">See your <strong style="color:var(--text)">today's workout split</strong> auto-generated from your days/week setting. Check off exercises as you complete them — once all are ticked, the workout is automatically logged. Track your 7-day streak, this week's session count, and your daily macro progress bars.</p>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--red)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span style="font-size:22px">⚡</span>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">3. Workout</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--red)">INSTANT PLANS, NO API</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.65">Tap a <strong style="color:var(--text)">quick preset</strong> (Push, Pull, Legs, Upper, Core, HIIT) for an instant plan, or use the custom generator — pick muscle group, duration, and equipment. Sets and reps are auto-assigned from your goal profile. The plan types itself out using a typewriter animation.</p>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--green)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span style="font-size:22px">🥗</span>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">4. Diet</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--green)">INDIAN MEALS IN YOUR BUDGET</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.65">Select veg / non-veg / vegan, enter your <strong style="color:var(--text)">daily food budget in ₹</strong>, and list any allergies. IRONFORGE picks 5 Indian meals (Poha, Dal Rice, Chicken Curry, etc.) that fit your diet type, budget, and calorie target. Also use the food log to manually track what you actually eat.</p>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--blue)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span style="font-size:22px">📈</span>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">5. Progress</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--blue)">TRACK YOUR BODY</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.65">Log your <strong style="color:var(--text)">weight, body fat %, chest, waist, arms, and legs</strong> measurements over time. A bar chart auto-builds from your last 14 entries. Your BMI, TDEE, and lean mass are always shown. Add personal bests — IRONFORGE alerts you when you set a new PR on any lift.</p>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--gold)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span style="font-size:22px">💰</span>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">6. Finance</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--gold)">SPEND SMARTER</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.65">Log gym fees, supplement purchases, and other fitness expenses. See your <strong style="color:var(--text)">monthly spend vs budget</strong> with visual health bars, and your year-to-date total. Color-coded: red for gym, gold for supplements, gray for other.</p>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--red)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span style="font-size:22px">📅</span>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">7. Calendar</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--red)">VISUALISE YOUR CONSISTENCY</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.65">Browse any month to see which days were <strong style="color:var(--text)">scheduled, completed, or missed</strong>. Click a past workout day to toggle it as done. See your full weekly split in the sidebar. The done/missed counters help you spot patterns in your consistency.</p>
+    </div>
+
+    <div class="card" style="border-left:3px solid var(--muted)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span style="font-size:22px">📚</span>
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">8. Exercises</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--muted)">REFERENCE LIBRARY</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.65">Browse all <strong style="color:var(--text)">48 exercises</strong> across Chest, Back, Legs, Shoulders, Arms, and Core. Each card shows the setup, execution, and a coaching cue. Filter by muscle group. Use it mid-workout when you're unsure about form on an unfamiliar exercise.</p>
+    </div>
+
+  </div>
+
+  <!-- Quick start steps -->
+  <div style="max-width:800px;margin:0 auto 40px">
+    <div class="section-title">Quick Start in 3 Steps</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:flex-start;gap:16px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:4px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--red);line-height:1;flex-shrink:0;min-width:36px">1</div>
+        <div><div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;letter-spacing:.5px;margin-bottom:4px">Go to Setup → fill in your profile</div><div style="font-size:13px;color:var(--muted);line-height:1.6">Your name, body stats, goal, days per week, and budget. Takes 2 minutes. This is required before any other page works correctly.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:16px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:4px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1;flex-shrink:0;min-width:36px">2</div>
+        <div><div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;letter-spacing:.5px;margin-bottom:4px">Open Dashboard → check off today's workout</div><div style="font-size:13px;color:var(--muted);line-height:1.6">Your split for today is auto-calculated. Tick exercises as you complete them. All done = workout logged. Your streak counter starts building.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:16px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:4px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--green);line-height:1;flex-shrink:0;min-width:36px">3</div>
+        <div><div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;letter-spacing:.5px;margin-bottom:4px">Use Workout + Diet generators daily</div><div style="font-size:13px;color:var(--muted);line-height:1.6">Generate a workout plan with one click. Generate a meal plan matched to your calories and budget. Log your food, log your lifts, watch the progress page fill up over time.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy note -->
+  <div style="max-width:800px;margin:0 auto 40px;padding:20px 24px;background:rgba(46,204,113,.05);border:1px solid rgba(46,204,113,.2);border-radius:4px;display:flex;gap:16px;align-items:flex-start">
+    <span style="font-size:22px;flex-shrink:0">🔒</span>
+    <div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;color:var(--green);margin-bottom:6px">100% PRIVATE — YOUR DATA NEVER LEAVES YOUR DEVICE</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.65">IRONFORGE makes zero network requests (except loading Google Fonts once). All your measurements, expenses, workouts, and meal logs are stored in your browser's <code style="background:var(--elevated);padding:1px 5px;border-radius:2px;font-size:12px;color:var(--text)">localStorage</code>. To back up your data, use your browser's export tools or simply copy the HTML file — your data lives in the browser profile, not the file.</p>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:32px 0">
+    <button class="btn btn-red" style="font-size:16px;padding:14px 36px" onclick="goPage('setup')">GET STARTED →</button>
+  </div>
+</div>
+
+<!-- ===== SETUP PAGE ===== -->
+<div id="page-setup" class="page">
+  <div class="spacer-lg"></div>
+  <div style="max-width:580px;margin:0 auto">
+    <h1>SETUP <span style="color:var(--red)">PROFILE</span></h1>
+    <p class="muted" style="margin:8px 0 28px;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.5px">Configure your training parameters</p>
+    <div class="wizard-dots">
+      <div class="dot active" id="dot-0"></div>
+      <div class="dot" id="dot-1"></div>
+      <div class="dot" id="dot-2"></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="setup-step-0" class="card">
+      <div class="section-title">Personal Info</div>
+      <div class="input-group"><div class="label">Name</div><input type="text" id="s-name" placeholder="Your name"></div>
+      <div class="grid-2">
+        <div class="input-group"><div class="label">Age</div><input type="number" id="s-age" placeholder="25" min="13" max="80"></div>
+        <div class="input-group"><div class="label">Gender</div>
+          <select id="s-gender"><option value="male">Male</option><option value="female">Female</option></select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="input-group"><div class="label">Weight (kg)</div><input type="number" id="s-weight" placeholder="75" min="30" max="250"></div>
+        <div class="input-group"><div class="label">Height (cm)</div><input type="number" id="s-height" placeholder="175" min="100" max="250"></div>
+      </div>
+      <button class="btn btn-red btn-full" onclick="setupNext(1)">NEXT →</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="setup-step-1" class="card" style="display:none">
+      <div class="section-title">Goal & Experience</div>
+      <div class="goal-grid" id="goal-grid">
+        <div class="goal-card" data-goal="Lean" onclick="selectGoal(this)"><div class="emoji">⚡</div><div class="goal-name">Lean</div></div>
+        <div class="goal-card" data-goal="Athletic" onclick="selectGoal(this)"><div class="emoji">🏃</div><div class="goal-name">Athletic</div></div>
+        <div class="goal-card" data-goal="Bulky" onclick="selectGoal(this)"><div class="emoji">💪</div><div class="goal-name">Bulky</div></div>
+        <div class="goal-card" data-goal="Toned" onclick="selectGoal(this)"><div class="emoji">🔥</div><div class="goal-name">Toned</div></div>
+        <div class="goal-card" data-goal="Endurance" onclick="selectGoal(this)"><div class="emoji">🫁</div><div class="goal-name">Endurance</div></div>
+        <div class="goal-card" data-goal="Strength" onclick="selectGoal(this)"><div class="emoji">🏋️</div><div class="goal-name">Strength</div></div>
+      </div>
+      <div class="label">Experience Level</div>
+      <div class="exp-btns">
+        <button class="exp-btn" data-exp="Beginner" onclick="selectExp(this)">Beginner</button>
+        <button class="exp-btn" data-exp="Intermediate" onclick="selectExp(this)">Intermediate</button>
+        <button class="exp-btn" data-exp="Advanced" onclick="selectExp(this)">Advanced</button>
+      </div>
+      <div style="display:flex;gap:12px">
+        <button class="btn btn-outline" onclick="setupNext(0)" style="flex:1">← BACK</button>
+        <button class="btn btn-red" onclick="setupNext(2)" style="flex:2">NEXT →</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="setup-step-2" class="card" style="display:none">
+      <div class="section-title">Training Plan</div>
+      <div class="grid-2">
+        <div class="input-group"><div class="label">Monthly Gym Fee (₹)</div><input type="number" id="s-gymfee" placeholder="1500" min="0"></div>
+        <div class="input-group"><div class="label">Supplement Budget (₹)</div><input type="number" id="s-suppbudget" placeholder="2000" min="0"></div>
+      </div>
+      <div class="grid-2">
+        <div class="input-group"><div class="label">Days / Week</div>
+          <select id="s-days"><option value="3">3 Days</option><option value="4">4 Days</option><option value="5" selected>5 Days</option><option value="6">6 Days</option></select>
+        </div>
+        <div class="input-group"><div class="label">Preferred Time</div>
+          <select id="s-time"><option value="Morning">Morning (6-9 AM)</option><option value="Afternoon">Afternoon (12-3 PM)</option><option value="Evening" selected>Evening (5-8 PM)</option><option value="Night">Night (8-10 PM)</option></select>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px">
+        <button class="btn btn-outline" onclick="setupNext(1)" style="flex:1">← BACK</button>
+        <button class="btn btn-gold" onclick="saveSetup()" style="flex:2">SAVE PROFILE ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="page-dashboard" class="page">
+  <div class="spacer-lg"></div>
+  <div id="dash-greeting" style="margin-bottom:24px">
+    <h1>WELCOME BACK, <span id="dash-name" style="color:var(--red)">ATHLETE</span></h1>
+    <p class="muted" style="font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px" id="dash-date"></p>
+  </div>
+  <div class="grid-4" style="margin-bottom:24px">
+    <div class="stat-card"><div class="stat-val" id="stat-workouts">0</div><div class="stat-label">Workouts This Week</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-streak">0</div><div class="stat-label">Day Streak 🔥</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-spend">₹0</div><div class="stat-label">Monthly Spend</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-goal" style="font-size:22px">—</div><div class="stat-label">Goal / Level</div></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:24px">
+    <div class="card">
+      <div class="section-title">Today's Workout</div>
+      <div id="today-workout-label" class="tag tag-red" style="margin-bottom:12px">—</div>
+      <div id="today-checklist"></div>
+      <div class="spacer"></div>
+      <button class="btn btn-outline btn-sm" onclick="markAllDone()">MARK ALL DONE ✓</button>
+    </div>
+    <div class="card">
+      <div class="section-title">Week View</div>
+      <div class="mini-cal">
+        <div class="mini-cal-head">M</div><div class="mini-cal-head">T</div><div class="mini-cal-head">W</div><div class="mini-cal-head">T</div><div class="mini-cal-head">F</div><div class="mini-cal-head">S</div><div class="mini-cal-head">S</div>
+        <div id="mini-cal-days"></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">Daily Macros</div>
+    <div class="grid-2">
+      <div>
+        <div class="progress-bar-wrap"><div class="progress-bar-label"><span>Calories</span><span id="pb-cal">0 / 0 kcal</span></div><div class="progress-bar"><div class="progress-fill fill-red" id="pf-cal" style="width:0%"></div></div></div>
+        <div class="progress-bar-wrap"><div class="progress-bar-label"><span>Protein</span><span id="pb-prot">0 / 0g</span></div><div class="progress-bar"><div class="progress-fill fill-blue" id="pf-prot" style="width:0%"></div></div></div>
+      </div>
+      <div>
+        <div class="progress-bar-wrap"><div class="progress-bar-label"><span>Carbs</span><span id="pb-carb">0 / 0g</span></div><div class="progress-bar"><div class="progress-fill fill-gold" id="pf-carb" style="width:0%"></div></div></div>
+        <div class="progress-bar-wrap"><div class="progress-bar-label"><span>Fat</span><span id="pb-fat">0 / 0g</span></div><div class="progress-bar"><div class="progress-fill fill-green" id="pf-fat" style="width:0%"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== WORKOUT PAGE ===== -->
+<div id="page-workout" class="page">
+  <div class="spacer-lg"></div>
+  <h1>WORKOUT <span style="color:var(--red)">GENERATOR</span></h1>
+  <p class="muted" style="margin:8px 0 28px;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.5px">Rule-based engine — no API, instant results</p>
+  <div class="section-title">Quick Presets</div>
+  <div class="grid-6" style="margin-bottom:28px">
+    <div class="preset-card" onclick="runPreset('Push')"><div class="preset-icon">🔴</div><div class="preset-name">Push</div></div>
+    <div class="preset-card" onclick="runPreset('Pull')"><div class="preset-icon">🔵</div><div class="preset-name">Pull</div></div>
+    <div class="preset-card" onclick="runPreset('Legs')"><div class="preset-icon">🟡</div><div class="preset-name">Legs</div></div>
+    <div class="preset-card" onclick="runPreset('Upper')"><div class="preset-icon">⚡</div><div class="preset-name">Upper</div></div>
+    <div class="preset-card" onclick="runPreset('Core')"><div class="preset-icon">🎯</div><div class="preset-name">Core</div></div>
+    <div class="preset-card" onclick="runPreset('HIIT')"><div class="preset-icon">🔥</div><div class="preset-name">HIIT</div></div>
+  </div>
+  <div class="card" style="margin-bottom:24px">
+    <div class="section-title">Custom Generator</div>
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="input-group"><div class="label">Muscle Focus</div>
+        <select id="w-muscle">
+          <option value="Chest">Chest</option><option value="Back">Back</option><option value="Legs">Legs</option>
+          <option value="Shoulders">Shoulders</option><option value="Arms">Arms</option><option value="Core">Core</option>
+          <option value="Full Body">Full Body</option>
+        </select>
+      </div>
+      <div class="input-group"><div class="label">Duration</div>
+        <select id="w-duration"><option value="30">30 Minutes</option><option value="45">45 Minutes</option><option value="60" selected>60 Minutes</option><option value="90">90 Minutes</option></select>
+      </div>
+      <div class="input-group"><div class="label">Equipment</div>
+        <select id="w-equipment"><option value="full">Full Gym</option><option value="dumbbells">Dumbbells Only</option><option value="bodyweight">Bodyweight</option></select>
+      </div>
+    </div>
+    <button class="btn btn-red btn-full" onclick="generateWorkout()">⚡ GENERATE WORKOUT</button>
+  </div>
+  <div class="card">
+    <div class="section-title">Generated Plan</div>
+    <div class="typewriter-output" id="workout-output">Select a preset or configure options above, then click GENERATE WORKOUT.</div>
+  </div>
+</div>
+
+<!-- ===== DIET PAGE ===== -->
+<div id="page-diet" class="page">
+  <div class="spacer-lg"></div>
+  <h1>DIET <span style="color:var(--red)">PLANNER</span></h1>
+  <p class="muted" style="margin:8px 0 28px;font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.5px">Personalised Indian meal plans, zero API</p>
+  <div class="card" style="margin-bottom:24px">
+    <div class="section-title">Generate Meal Plan</div>
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="input-group"><div class="label">Diet Type</div>
+        <select id="d-type"><option value="veg">Vegetarian</option><option value="non-veg">Non-Vegetarian</option><option value="vegan">Vegan</option></select>
+      </div>
+      <div class="input-group"><div class="label">Daily Budget (₹)</div><input type="number" id="d-budget" placeholder="150" min="50" value="150"></div>
+      <div class="input-group"><div class="label">Allergies (comma separated)</div><input type="text" id="d-allergies" placeholder="e.g. dairy, nuts"></div>
+    </div>
+    <button class="btn btn-red btn-full" onclick="generateDiet()">🥗 GENERATE DIET PLAN</button>
+  </div>
+  <div class="card" style="margin-bottom:24px">
+    <div class="section-title">Meal Plan</div>
+    <div class="typewriter-output" id="diet-output">Configure options above and click GENERATE DIET PLAN.</div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="section-title">Food Log</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input type="text" id="fl-name" placeholder="Food name" style="flex:2">
+        <input type="number" id="fl-cal" placeholder="kcal" style="flex:1;min-width:70px">
+        <input type="number" id="fl-prot" placeholder="Protein g" style="flex:1;min-width:70px">
+        <button class="btn btn-red btn-sm" onclick="addFoodLog()">ADD</button>
+      </div>
+      <div id="food-log-list"></div>
+      <div style="margin-top:12px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:2px">
+        <span class="label">Total Today: </span>
+        <span id="fl-total-cal" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold)">0</span>
+        <span style="color:var(--muted);font-size:13px"> kcal / </span>
+        <span id="fl-total-prot" style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--blue)">0</span>
+        <span style="color:var(--muted);font-size:13px">g protein</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Supplement Stack</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input type="text" id="supp-name" placeholder="Supplement name" style="flex:1">
+        <button class="btn btn-red btn-sm" onclick="addSupp()">ADD</button>
+      </div>
+      <div id="supp-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PROGRESS PAGE ===== -->
+<div id="page-progress" class="page">
+  <div class="spacer-lg"></div>
+  <h1>PROGRESS <span style="color:var(--red)">TRACKER</span></h1>
+  <div class="grid-4" style="margin-bottom:24px" id="body-comp-cards">
+    <div class="stat-card"><div class="stat-val" id="bmi-val">—</div><div class="stat-label">BMI</div></div>
+    <div class="stat-card"><div class="stat-val" id="tdee-val">—</div><div class="stat-label">TDEE (kcal)</div></div>
+    <div class="stat-card"><div class="stat-val" id="bf-val">—</div><div class="stat-label">Body Fat %</div></div>
+    <div class="stat-card"><div class="stat-val" id="lm-val">—</div><div class="stat-label">Lean Mass (kg)</div></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:24px">
+    <div class="card">
+      <div class="section-title">Log Measurements</div>
+      <div class="grid-2">
+        <div class="input-group"><div class="label">Weight (kg)</div><input type="number" id="m-weight" placeholder="75" step="0.1"></div>
+        <div class="input-group"><div class="label">Body Fat %</div><input type="number" id="m-bf" placeholder="18" step="0.1"></div>
+        <div class="input-group"><div class="label">Chest (cm)</div><input type="number" id="m-chest" placeholder="95"></div>
+        <div class="input-group"><div class="label">Waist (cm)</div><input type="number" id="m-waist" placeholder="80"></div>
+        <div class="input-group"><div class="label">Arms (cm)</div><input type="number" id="m-arms" placeholder="35"></div>
+        <div class="input-group"><div class="label">Legs (cm)</div><input type="number" id="m-legs" placeholder="55"></div>
+      </div>
+      <button class="btn btn-red btn-full" onclick="saveMeasurement()">SAVE LOG</button>
+    </div>
+    <div class="card">
+      <div class="section-title">Weight Chart (Last 14)</div>
+      <div class="bar-chart" id="weight-chart"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">Personal Bests</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input type="text" id="pb-ex" placeholder="Exercise" style="flex:2">
+      <input type="number" id="pb-kg" placeholder="kg" style="flex:1;min-width:70px">
+      <button class="btn btn-gold btn-sm" onclick="addPB()">ADD PB</button>
+    </div>
+    <div id="pb-list"></div>
+  </div>
+</div>
+
+<!-- ===== FINANCE PAGE ===== -->
+<div id="page-finance" class="page">
+  <div class="spacer-lg"></div>
+  <h1>FITNESS <span style="color:var(--red)">FINANCE</span></h1>
+  <div class="grid-3" style="margin-bottom:24px">
+    <div class="stat-card"><div class="stat-val" id="fin-gym">₹0</div><div class="stat-label">Monthly Gym Fee</div></div>
+    <div class="stat-card"><div class="stat-val" id="fin-supp">₹0</div><div class="stat-label">Supplement Spend</div></div>
+    <div class="stat-card"><div class="stat-val" id="fin-ytd">₹0</div><div class="stat-label">Total YTD</div></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:24px">
+    <div class="card">
+      <div class="section-title">Add Expense</div>
+      <div class="input-group"><div class="label">Category</div>
+        <select id="exp-cat"><option value="gym">Gym Fee</option><option value="supplement">Supplement</option><option value="other">Other</option></select>
+      </div>
+      <div class="input-group"><div class="label">Description</div><input type="text" id="exp-desc" placeholder="e.g. Whey Protein"></div>
+      <div class="input-group"><div class="label">Amount (₹)</div><input type="number" id="exp-amt" placeholder="500" min="0"></div>
+      <button class="btn btn-red btn-full" onclick="addExpense()">ADD EXPENSE</button>
+    </div>
+    <div class="card">
+      <div class="section-title">Budget Health</div>
+      <div id="budget-bars"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">Expense Log</div>
+    <div id="expense-log"></div>
+  </div>
+</div>
+
+<!-- ===== CALENDAR PAGE ===== -->
+<div id="page-calendar" class="page">
+  <div class="spacer-lg"></div>
+  <h1>TRAINING <span style="color:var(--red)">CALENDAR</span></h1>
+  <div class="grid-2">
+    <div class="card" style="grid-column:1/3">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="calNav(-1)">‹</button>
+        <h2 id="cal-month-label" style="font-size:22px;letter-spacing:3px"></h2>
+        <button class="cal-nav" onclick="calNav(1)">›</button>
+      </div>
+      <div class="full-cal">
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Week Split</div>
+      <div id="week-split-list"></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Calendar Stats</div>
+      <div class="grid-2">
+        <div class="stat-card"><div class="stat-val" id="cal-done-cnt" style="font-size:28px">0</div><div class="stat-label">Workouts Done</div></div>
+        <div class="stat-card"><div class="stat-val" id="cal-miss-cnt" style="font-size:28px;color:var(--red-dark)">0</div><div class="stat-label">Missed</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EXERCISES PAGE ===== -->
+<div id="page-exercises" class="page">
+  <div class="spacer-lg"></div>
+  <h1>EXERCISE <span style="color:var(--red)">LIBRARY</span></h1>
+  <div class="filter-btns" id="ex-filters">
+    <button class="filter-btn active" onclick="filterExercises('all',this)">All</button>
+    <button class="filter-btn" onclick="filterExercises('Chest',this)">Chest</button>
+    <button class="filter-btn" onclick="filterExercises('Back',this)">Back</button>
+    <button class="filter-btn" onclick="filterExercises('Legs',this)">Legs</button>
+    <button class="filter-btn" onclick="filterExercises('Shoulders',this)">Shoulders</button>
+    <button class="filter-btn" onclick="filterExercises('Arms',this)">Arms</button>
+    <button class="filter-btn" onclick="filterExercises('Core',this)">Core</button>
+  </div>
+  <div class="grid-3" id="exercise-library-grid"></div>
+</div>
+
+</div><!-- end page-wrap -->
+
+<script>
+// ===== DATA =====
+
+const SPLITS = {
+  3: {1:'Push',3:'Pull',5:'Legs'},
+  4: {1:'Chest/Tri',2:'Back/Bi',4:'Shoulders',5:'Legs'},
+  5: {1:'Chest',2:'Back',3:'Shoulders',4:'Legs',5:'Arms'},
+  6: {1:'Push',2:'Pull',3:'Legs',4:'Push',5:'Pull',6:'Legs'}
+};
+
+const EXERCISES_DB = {
+  Chest:[
+    {name:'Bench Press',equip:['full','dumbbells'],desc:'Lie on a flat bench, grip the bar slightly wider than shoulder-width. Lower the bar with control to mid-chest. Press explosively, fully extending the arms while keeping shoulder blades retracted.'},
+    {name:'Incline DB Press',equip:['full','dumbbells'],desc:'Set bench to 30-45°. Hold dumbbells at chest level, elbows at 45°. Press up and slightly inward until arms are nearly straight. Lower slowly, feeling a stretch in the upper pecs.'},
+    {name:'Push-Up',equip:['full','dumbbells','bodyweight'],desc:'Place hands slightly wider than shoulder-width on the floor. Keep your body in a straight line from head to heels. Lower your chest to the floor, then press back up with control.'},
+    {name:'Cable Fly',equip:['full'],desc:'Set cables to shoulder height. Stand in a staggered stance, arms wide. Bring hands together in front of chest in a wide arc. Squeeze the chest at the peak contraction.'},
+    {name:'Chest Dip',equip:['full','bodyweight'],desc:'On parallel bars, lean forward with elbows slightly flared. Lower until a stretch is felt in the chest. Push back up powerfully, keeping the forward lean throughout.'},
+    {name:'Decline Press',equip:['full'],desc:'On a decline bench, grip the bar at shoulder-width. Lower the bar to the lower chest. Press up in a slight arc — this angle targets the lower pectoral fibers effectively.'},
+    {name:'DB Pullover',equip:['full','dumbbells'],desc:'Lie perpendicular to a bench holding one dumbbell overhead. With a slight elbow bend, lower the weight behind your head. Pull it back over your chest in a sweeping arc.'},
+    {name:'Pec Deck',equip:['full'],desc:'Sit at the pec deck machine and place forearms against the pads. Bring your arms together in front, squeezing your chest hard. Release slowly with complete control.'}
+  ],
+  Back:[
+    {name:'Deadlift',equip:['full'],desc:'Stand over the bar, feet hip-width apart. Hinge at the hips to grip the bar just outside your legs. Drive through the floor, keeping your back flat, until fully upright.'},
+    {name:'Pull-Up',equip:['full','bodyweight'],desc:'Hang from a bar with a shoulder-width overhand grip. Pull your elbows down toward your hips until your chin clears the bar. Lower with full control for maximum lat activation.'},
+    {name:'Barbell Row',equip:['full'],desc:'Hinge forward to about 45°, keeping back flat. Pull the bar to your lower chest by driving elbows back. Squeeze the back at the top, then lower the weight under control.'},
+    {name:'Lat Pulldown',equip:['full'],desc:'Grab the bar wider than shoulder-width. Pull it down to your upper chest while leaning back slightly. Let the bar rise slowly — feel the lats stretching under load.'},
+    {name:'Seated Row',equip:['full'],desc:'Sit tall at the cable row, feet on the platform. Pull the handle to your lower abdomen by driving elbows back. Pause, squeeze, then return to a full stretch.'},
+    {name:'T-Bar Row',equip:['full'],desc:'Straddle the bar, grip the handle, and hinge to 45°. Row the weight up by driving elbows toward the ceiling. Keep back neutral and chest up throughout.'},
+    {name:'Face Pull',equip:['full'],desc:'Set cable at head height, use a rope attachment. Pull the rope to your face, flaring elbows wide. This targets rear delts and upper back — the most neglected area in training.'},
+    {name:'Single-Arm Row',equip:['full','dumbbells'],desc:'Place one knee and hand on a bench for support. Row the dumbbell up to your hip by driving the elbow back. Rotate the torso slightly at the top for a full contraction.'}
+  ],
+  Legs:[
+    {name:'Squat',equip:['full'],desc:'Position bar across upper traps, feet shoulder-width apart, toes out 15°. Break at the hips and knees simultaneously, descending until thighs are parallel. Drive up through the whole foot.'},
+    {name:'Romanian Deadlift',equip:['full','dumbbells'],desc:'Hold weights in front of thighs with a soft knee bend. Hinge at the hips, sending weight back as you push your hips backward. Feel the hamstring stretch, then drive hips forward to stand.'},
+    {name:'Leg Press',equip:['full'],desc:'Place feet shoulder-width on the platform. Unrack and lower the sled until knees hit 90°. Press through the heels to full extension, but never lock out completely.'},
+    {name:'Lunge',equip:['full','dumbbells','bodyweight'],desc:'Step forward into a long stride, lowering the back knee toward the floor. Keep your torso vertical and front knee tracking over toes. Push off the front foot to return to start.'},
+    {name:'Leg Curl',equip:['full'],desc:'Lie on the leg curl machine and curl the weight toward your glutes. Pause at the top contraction. Lower with complete control — the eccentric phase is where hamstrings grow.'},
+    {name:'Leg Extension',equip:['full'],desc:'Sit in the machine with the pad just above your ankles. Extend your legs to full contraction, holding briefly. Lower slowly and never allow the weight to crash down.'},
+    {name:'Calf Raise',equip:['full','dumbbells','bodyweight'],desc:'Stand on the edge of a step or platform with heels hanging. Rise up on your toes as high as possible. Lower your heels below the platform level for a deep stretch each rep.'},
+    {name:'Sumo Squat',equip:['full','dumbbells','bodyweight'],desc:'Take a very wide stance with toes pointing out to 45°. Hold weight between legs. Sit straight down, keeping knees tracking over toes. This targets the inner thighs and glutes deeply.'}
+  ],
+  Shoulders:[
+    {name:'Overhead Press',equip:['full'],desc:'Hold the barbell at shoulder height, hands just outside shoulder-width. Press directly overhead until elbows lock out. Lower with control — do not let it crash back to the front rack position.'},
+    {name:'Lateral Raise',equip:['full','dumbbells'],desc:'Hold dumbbells at sides, slight elbow bend. Raise arms out to the sides until parallel to floor. Lead with the elbows, not the hands, and avoid shrugging.'},
+    {name:'Front Raise',equip:['full','dumbbells'],desc:'Hold weights in front of thighs. Raise one or both arms forward to shoulder height. Keep a slight elbow bend and avoid using momentum or body rock.'},
+    {name:'Arnold Press',equip:['dumbbells'],desc:'Start with dumbbells at chin height, palms facing you. As you press overhead, rotate palms to face away. This rotation pattern recruits all three heads of the deltoid muscle.'},
+    {name:'Shrug',equip:['full','dumbbells'],desc:'Hold heavy weights at sides. Shrug shoulders directly upward toward your ears. Hold the top position for a beat. Do not roll — pure vertical movement isolates the trapezius.'},
+    {name:'Upright Row',equip:['full','dumbbells'],desc:'Hold bar or dumbbells in front, hands inside shoulder-width. Pull straight up, leading with elbows until the bar reaches chin height. Control the descent completely.'},
+    {name:'Rear Delt Fly',equip:['full','dumbbells'],desc:'Hinge forward 45–90°. With a slight elbow bend, raise arms out to the sides in a reverse-fly motion. Squeeze the rear delts — this is the most overlooked part of shoulder development.'},
+    {name:'Cable Lateral',equip:['full'],desc:'Set cable low and grab the handle across your body. Raise the arm out to the side in a wide arc. The constant cable tension provides superior load compared to dumbbells at the top.'}
+  ],
+  Arms:[
+    {name:'Barbell Curl',equip:['full'],desc:'Hold bar with underhand shoulder-width grip, arms fully extended. Curl up to shoulder height by contracting biceps. Lower slowly — the negative phase is essential for growth.'},
+    {name:'Hammer Curl',equip:['full','dumbbells'],desc:'Hold dumbbells with a neutral (thumbs up) grip. Curl while keeping palms facing each other throughout. This variation builds the brachialis, adding thickness to the upper arm.'},
+    {name:'Skull Crusher',equip:['full'],desc:'Lie on a bench, holding the bar above your chest with elbows locked. Hinge only at the elbows, lowering the weight toward your forehead. Extend back to start — pure tricep isolation.'},
+    {name:'Tricep Pushdown',equip:['full'],desc:'At a cable stack, grip a bar or rope with elbows pinned to sides at 90°. Push the weight down by extending the elbows. Squeeze hard at full extension and return slowly.'},
+    {name:'Dip',equip:['full','bodyweight'],desc:'Hold yourself on parallel bars, torso upright. Lower until upper arms are parallel to floor. Press back up powerfully, keeping elbows from flaring too wide.'},
+    {name:'Preacher Curl',equip:['full'],desc:'Rest your arms on the preacher pad, gripping an EZ bar. Curl the bar up from a fully stretched position. This eliminates body swing, forcing pure bicep engagement.'},
+    {name:'Concentration Curl',equip:['full','dumbbells'],desc:'Sit on a bench, elbow on inner thigh. Curl the dumbbell to full contraction. Rotate your wrist at the top for peak bicep squeeze. Lower all the way for maximum stretch.'},
+    {name:'Diamond Push-Up',equip:['full','dumbbells','bodyweight'],desc:'Place hands directly below your chest with thumbs and forefingers forming a diamond shape. Perform a push-up — this hand position maximally loads the medial head of the tricep.'}
+  ],
+  Core:[
+    {name:'Plank',equip:['full','dumbbells','bodyweight'],desc:'Hold a push-up position on forearms. Keep your body rigid like a plank from head to heels. Brace your core as if expecting a punch and breathe steadily — no sagging hips.'},
+    {name:'Crunch',equip:['full','dumbbells','bodyweight'],desc:'Lie on your back with knees bent. Place hands behind head without interlacing fingers. Flex the spine forward by contracting your abs — do not pull on your neck.'},
+    {name:'Russian Twist',equip:['full','dumbbells','bodyweight'],desc:'Sit with knees bent, leaning back 45°. Rotate your torso side to side, tapping the floor (or holding a weight). Keep feet elevated for an extra challenge.'},
+    {name:'Leg Raise',equip:['full','bodyweight'],desc:'Lie flat, hands under glutes. Keep legs straight as you raise them to vertical. Lower slowly — the moment your lower back lifts off the floor, you lose the core benefit.'},
+    {name:'Ab Wheel',equip:['full'],desc:'Kneel holding the ab wheel. Roll forward slowly until fully extended (or nearly so). Use your abs to pull yourself back. This is one of the hardest core exercises in existence.'},
+    {name:'Mountain Climber',equip:['full','dumbbells','bodyweight'],desc:'Start in a push-up position. Drive one knee toward your chest, then quickly switch. Maintain a rigid plank position throughout — do not let your hips sag or rise.'},
+    {name:'Bicycle Crunch',equip:['full','dumbbells','bodyweight'],desc:'Lie on your back, hands behind head. Bring alternate elbow to opposite knee while extending the other leg. Focus on rotating the torso — not just moving the elbow.'},
+    {name:'Dead Bug',equip:['full','dumbbells','bodyweight'],desc:'Lie on back, arms up, knees bent at 90°. Slowly lower one arm and the opposite leg toward the floor. Return and switch. Maintain spinal contact with the floor throughout.'}
+  ]
+};
+
+const FOOD_DB = {
+  breakfast:[
+    {name:'Poha',cal:250,prot:6,carbs:45,fat:5,cost:20,tags:['veg','vegan'],allergens:[]},
+    {name:'Upma',cal:220,prot:6,carbs:40,fat:4,cost:20,tags:['veg','vegan'],allergens:[]},
+    {name:'Idli-Sambar',cal:280,prot:9,carbs:50,fat:3,cost:30,tags:['veg','vegan'],allergens:[]},
+    {name:'Aloo Paratha with Curd',cal:380,prot:9,carbs:60,fat:12,cost:35,tags:['veg'],allergens:['dairy']},
+    {name:'Oats with Milk',cal:300,prot:12,carbs:48,fat:6,cost:25,tags:['veg'],allergens:['dairy']},
+    {name:'Besan Chilla',cal:260,prot:12,carbs:38,fat:8,cost:20,tags:['veg','vegan'],allergens:[]},
+    {name:'Moong Dal Chilla',cal:240,prot:14,carbs:36,fat:5,cost:20,tags:['veg','vegan'],allergens:[]},
+    {name:'Bread & Egg',cal:320,prot:18,carbs:40,fat:10,cost:25,tags:['non-veg'],allergens:['gluten','egg']},
+    {name:'Dalia (Broken Wheat)',cal:280,prot:10,carbs:52,fat:3,cost:20,tags:['veg','vegan'],allergens:['gluten']},
+    {name:'Banana & Milk',cal:250,prot:8,carbs:52,fat:2,cost:20,tags:['veg'],allergens:['dairy']}
+  ],
+  lunch:[
+    {name:'Dal Rice',cal:420,prot:18,carbs:75,fat:5,cost:40,tags:['veg','vegan'],allergens:[]},
+    {name:'Rajma Rice',cal:460,prot:22,carbs:80,fat:6,cost:45,tags:['veg','vegan'],allergens:[]},
+    {name:'Chole Rice',cal:480,prot:20,carbs:82,fat:8,cost:45,tags:['veg','vegan'],allergens:[]},
+    {name:'Roti-Sabzi-Dal',cal:400,prot:16,carbs:70,fat:7,cost:40,tags:['veg','vegan'],allergens:['gluten']},
+    {name:'Paneer Bhurji Roti',cal:480,prot:28,carbs:55,fat:18,cost:60,tags:['veg'],allergens:['dairy','gluten']},
+    {name:'Chicken Rice',cal:520,prot:42,carbs:62,fat:10,cost:70,tags:['non-veg'],allergens:[]},
+    {name:'Egg Curry Rice',cal:460,prot:24,carbs:65,fat:12,cost:50,tags:['non-veg'],allergens:['egg']},
+    {name:'Mixed Veg Khichdi',cal:380,prot:14,carbs:68,fat:5,cost:35,tags:['veg','vegan'],allergens:[]}
+  ],
+  dinner:[
+    {name:'Roti-Dal-Sabzi',cal:380,prot:15,carbs:65,fat:7,cost:40,tags:['veg','vegan'],allergens:['gluten']},
+    {name:'Paneer Curry Roti',cal:460,prot:26,carbs:55,fat:16,cost:60,tags:['veg'],allergens:['dairy','gluten']},
+    {name:'Chicken Curry Roti',cal:500,prot:40,carbs:52,fat:14,cost:70,tags:['non-veg'],allergens:['gluten']},
+    {name:'Fish Curry Rice',cal:480,prot:38,carbs:62,fat:12,cost:65,tags:['non-veg'],allergens:['fish']},
+    {name:'Dal Khichdi',cal:360,prot:14,carbs:64,fat:5,cost:35,tags:['veg','vegan'],allergens:[]},
+    {name:'Tofu Stir Fry Roti',cal:380,prot:22,carbs:48,fat:12,cost:50,tags:['veg','vegan'],allergens:['gluten','soy']}
+  ],
+  snacks:[
+    {name:'Chana Chaat',cal:180,prot:9,carbs:28,fat:3,cost:20,tags:['veg','vegan'],allergens:[]},
+    {name:'Roasted Peanuts',cal:200,prot:9,carbs:12,fat:14,cost:15,tags:['veg','vegan'],allergens:['nuts']},
+    {name:'Banana',cal:90,prot:1,carbs:23,fat:0,cost:10,tags:['veg','vegan'],allergens:[]},
+    {name:'Curd',cal:120,prot:7,carbs:12,fat:4,cost:15,tags:['veg'],allergens:['dairy']},
+    {name:'Boiled Eggs (2)',cal:160,prot:12,carbs:1,fat:10,cost:20,tags:['non-veg'],allergens:['egg']},
+    {name:'Sprouts Bowl',cal:140,prot:10,carbs:22,fat:2,cost:15,tags:['veg','vegan'],allergens:[]},
+    {name:'Makhana (Fox Nuts)',cal:100,prot:4,carbs:18,fat:1,cost:20,tags:['veg','vegan'],allergens:[]},
+    {name:'Fruit Bowl',cal:150,prot:2,carbs:38,fat:0,cost:25,tags:['veg','vegan'],allergens:[]},
+    {name:'Homemade Protein Shake',cal:250,prot:30,carbs:20,fat:4,cost:30,tags:['veg'],allergens:['dairy','nuts']},
+    {name:'Sattu Drink',cal:180,prot:11,carbs:30,fat:2,cost:15,tags:['veg','vegan'],allergens:[]}
+  ]
+};
+
+// ===== HELPERS =====
+
+function getProfile(){return JSON.parse(localStorage.getItem('if_profile')||'null')}
+function saveProfile(p){localStorage.setItem('if_profile',JSON.stringify(p));toast('Profile saved ✓','green')}
+function getExpenses(){return JSON.parse(localStorage.getItem('if_expenses')||'[]')}
+function saveExpenses(e){localStorage.setItem('if_expenses',JSON.stringify(e))}
+function getMeasurements(){return JSON.parse(localStorage.getItem('if_measurements')||'[]')}
+function saveMeasurements(m){localStorage.setItem('if_measurements',JSON.stringify(m))}
+function getPBs(){return JSON.parse(localStorage.getItem('if_pbs')||'[]')}
+function savePBs(p){localStorage.setItem('if_pbs',JSON.stringify(p))}
+function getFoodLog(){return JSON.parse(localStorage.getItem('if_food')||'[]')}
+function saveFoodLog(f){localStorage.setItem('if_food',JSON.stringify(f))}
+function getSupps(){return JSON.parse(localStorage.getItem('if_supps')||'[]')}
+function saveSupps(s){localStorage.setItem('if_supps',JSON.stringify(s))}
+function getWorkoutLog(){return JSON.parse(localStorage.getItem('if_workoutlog')||'{}')}
+function saveWorkoutLog(w){localStorage.setItem('if_workoutlog',JSON.stringify(w))}
+function getTodayChecks(){return JSON.parse(localStorage.getItem('if_todaychecks')||'{}')}
+function saveTodayChecks(c){localStorage.setItem('if_todaychecks',JSON.stringify(c))}
+
+function today(){return new Date().toISOString().split('T')[0]}
+function calcBMR(p){
+  if(!p)return 2000;
+  const bmr=p.gender==='male'?10*p.weight+6.25*p.height-5*p.age+5:10*p.weight+6.25*p.height-5*p.age-161;
+  return Math.round(bmr*1.55);
+}
+function calcBMI(p){return p?+(p.weight/((p.height/100)**2)).toFixed(1):0}
+function calcLeanMass(w,bf){return +(w*(1-bf/100)).toFixed(1)}
+function macroTargets(p){
+  const tdee=calcBMR(p);
+  return {
+    calories:tdee,
+    protein:Math.round((p?p.weight:70)*2.2),
+    carbs:Math.round(tdee*0.4/4),
+    fat:Math.round(tdee*0.25/9)
+  };
+}
+
+function toast(msg,type=''){
+  const c=document.getElementById('toast-container');
+  const t=document.createElement('div');
+  t.className='toast '+(type||'');
+  t.textContent=msg;
+  c.appendChild(t);
+  requestAnimationFrame(()=>{requestAnimationFrame(()=>{t.classList.add('show')})});
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400)},3000);
+}
+
+function typewriter(el,text,speed=12){
+  el.innerHTML='';
+  const cursor=document.createElement('span');
+  cursor.className='cursor-blink';
+  el.appendChild(cursor);
+  let i=0;
+  const iv=setInterval(()=>{
+    if(i<text.length){el.insertBefore(document.createTextNode(text[i++]),cursor);}
+    else{clearInterval(iv);cursor.remove();}
+  },speed);
+}
+
+// ===== THEME =====
+function toggleTheme(){
+  const html=document.documentElement;
+  const isLight=html.getAttribute('data-theme')==='light';
+  const next=isLight?'dark':'light';
+  html.setAttribute('data-theme',next);
+  document.getElementById('theme-toggle').textContent=next==='light'?'☀️':'🌙';
+  localStorage.setItem('if_theme',next);
+}
+function loadTheme(){
+  const saved=localStorage.getItem('if_theme')||'light';
+  document.documentElement.setAttribute('data-theme',saved);
+  const btn=document.getElementById('theme-toggle');
+  if(btn)btn.textContent=saved==='light'?'☀️':'🌙';
+}
+
+// ===== MOBILE MENU =====
+function toggleMobileMenu(){
+  const menu=document.getElementById('mobile-menu');
+  const overlay=document.getElementById('mobile-overlay');
+  const burger=document.getElementById('hamburger');
+  const open=menu.classList.toggle('open');
+  overlay.classList.toggle('open',open);
+  burger.classList.toggle('open',open);
+  document.body.style.overflow=open?'hidden':'';
+}
+function syncMobileActive(pageId){
+  document.querySelectorAll('.mob-link').forEach(l=>{
+    l.classList.toggle('active',l.dataset.page===pageId);
+  });
+}
+
+// ===== NAVIGATION =====
+
+let currentPage='dashboard';
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const link=document.querySelector('[data-page="'+id+'"]');
+  if(link)link.classList.add('active');
+  syncMobileActive(id);
+  currentPage=id;
+  if(id==='dashboard')renderDashboard();
+  if(id==='progress')renderProgress();
+  if(id==='finance')renderFinance();
+  if(id==='calendar')renderCalendar();
+  if(id==='exercises')renderExercises('all');
+  if(id==='diet'){renderFoodLog();renderSupps();}
+}
+
+// ===== SETUP =====
+
+let setupGoal='',setupExp='';
+function setupNext(step){
+  if(step===1){
+    const n=document.getElementById('s-name').value.trim();
+    if(!n){toast('Enter your name','');return;}
+  }
+  if(step===2){
+    if(!setupGoal){toast('Select a goal','');return;}
+    if(!setupExp){toast('Select experience level','');return;}
+  }
+  document.querySelectorAll('[id^="setup-step-"]').forEach(s=>s.style.display='none');
+  document.getElementById('setup-step-'+step).style.display='';
+  document.querySelectorAll('.dot').forEach((d,i)=>{
+    d.classList.remove('active','done');
+    if(i<step)d.classList.add('done');
+    if(i===step)d.classList.add('active');
+  });
+}
+function selectGoal(el){
+  document.querySelectorAll('.goal-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  setupGoal=el.dataset.goal;
+}
+function selectExp(el){
+  document.querySelectorAll('.exp-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  setupExp=el.dataset.exp;
+}
+function saveSetup(){
+  const profile={
+    name:document.getElementById('s-name').value.trim(),
+    age:+document.getElementById('s-age').value||25,
+    gender:document.getElementById('s-gender').value,
+    weight:+document.getElementById('s-weight').value||70,
+    height:+document.getElementById('s-height').value||170,
+    goal:setupGoal||'Athletic',
+    experience:setupExp||'Beginner',
+    gymFee:+document.getElementById('s-gymfee').value||0,
+    suppBudget:+document.getElementById('s-suppbudget').value||0,
+    days:+document.getElementById('s-days').value||5,
+    prefTime:document.getElementById('s-time').value
+  };
+  saveProfile(profile);
+  goPage('dashboard');
+}
+function fillSetupFromProfile(){
+  const p=getProfile();
+  if(!p)return;
+  document.getElementById('s-name').value=p.name||'';
+  document.getElementById('s-age').value=p.age||'';
+  document.getElementById('s-gender').value=p.gender||'male';
+  document.getElementById('s-weight').value=p.weight||'';
+  document.getElementById('s-height').value=p.height||'';
+  document.getElementById('s-gymfee').value=p.gymFee||'';
+  document.getElementById('s-suppbudget').value=p.suppBudget||'';
+  document.getElementById('s-days').value=p.days||5;
+  document.getElementById('s-time').value=p.prefTime||'Evening';
+  setupGoal=p.goal||'';
+  setupExp=p.experience||'';
+  document.querySelectorAll('.goal-card').forEach(c=>{if(c.dataset.goal===p.goal)c.classList.add('selected')});
+  document.querySelectorAll('.exp-btn').forEach(b=>{if(b.dataset.exp===p.experience)b.classList.add('selected')});
+}
+
+// ===== WORKOUT SPLIT =====
+
+function getTodaySplit(){
+  const p=getProfile();
+  const days=p?p.days:5;
+  const split=SPLITS[days]||SPLITS[5];
+  const dow=new Date().getDay();
+  const adjusted=dow===0?7:dow;
+  return split[adjusted]||null;
+}
+function getSplitForDow(dow,days){
+  const split=SPLITS[days]||SPLITS[5];
+  const adj=dow===0?7:dow;
+  return split[adj]||null;
+}
+function isWorkoutDay(dow,days){return !!getSplitForDow(dow,days)}
+function getWorkoutExercises(splitName){
+  if(!splitName)return [];
+  const s=splitName.toLowerCase();
+  let muscles=[];
+  if(s.includes('push'))muscles=['Chest','Shoulders','Arms'];
+  else if(s.includes('pull'))muscles=['Back','Arms'];
+  else if(s.includes('legs'))muscles=['Legs','Core'];
+  else if(s.includes('chest'))muscles=['Chest'];
+  else if(s.includes('back'))muscles=['Back'];
+  else if(s.includes('shoulder'))muscles=['Shoulders'];
+  else if(s.includes('arm'))muscles=['Arms'];
+  else if(s.includes('core'))muscles=['Core'];
+  else if(s.includes('upper'))muscles=['Chest','Back','Shoulders'];
+  else muscles=['Chest','Back'];
+  let list=[];
+  muscles.forEach(m=>{if(EXERCISES_DB[m])list=list.concat(EXERCISES_DB[m].slice(0,3).map(e=>({...e,muscle:m})))});
+  return list.slice(0,6);
+}
+
+// ===== DASHBOARD =====
+
+function renderDashboard(){
+  const p=getProfile();
+  if(!p){goPage('setup');return;}
+  const d=new Date();
+  document.getElementById('dash-name').textContent=p.name.toUpperCase()||'ATHLETE';
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('dash-date').textContent=days[d.getDay()]+', '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear()+' — '+p.prefTime+' session';
+  document.getElementById('stat-goal').textContent=p.goal+' / '+p.experience;
+
+  // Workouts this week
+  const wl=getWorkoutLog();
+  const weekStart=getWeekStart();
+  let weekCount=0;
+  for(let i=0;i<7;i++){
+    const dd=new Date(weekStart);dd.setDate(dd.getDate()+i);
+    const key=dd.toISOString().split('T')[0];
+    if(wl[key]==='done')weekCount++;
+  }
+  document.getElementById('stat-workouts').textContent=weekCount;
+
+  // Streak
+  document.getElementById('stat-streak').textContent=calcStreak(p,wl);
+
+  // Monthly spend
+  const exp=getExpenses();
+  const now=new Date();
+  const monthSpend=exp.filter(e=>{const ed=new Date(e.date);return ed.getMonth()===now.getMonth()&&ed.getFullYear()===now.getFullYear();}).reduce((a,b)=>a+b.amount,0);
+  document.getElementById('stat-spend').textContent='₹'+monthSpend;
+
+  // Today checklist
+  const split=getTodaySplit();
+  document.getElementById('today-workout-label').textContent=split?'Today: '+split:'Rest Day';
+  const exercises=split?getWorkoutExercises(split):[];
+  const checks=getTodayChecks();
+  const todayKey=today();
+  const checkList=document.getElementById('today-checklist');
+  checkList.innerHTML='';
+  if(!split){
+    checkList.innerHTML='<p class="muted" style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;padding:12px 0">Rest day — recover well 💤</p>';
+  } else {
+    exercises.forEach((ex,i)=>{
+      const key=todayKey+'_'+i;
+      const done=checks[key];
+      const item=document.createElement('div');
+      item.className='check-item'+(done?' done':'');
+      item.innerHTML=`<div class="check-box">${done?'✓':''}</div><div class="check-name">${ex.name}</div><div class="check-detail">${ex.muscle}</div>`;
+      item.onclick=()=>toggleCheck(key,item);
+      checkList.appendChild(item);
+    });
+  }
+
+  // Mini calendar
+  const calDays=document.getElementById('mini-cal-days');
+  calDays.innerHTML='';
+  const ws=getWeekStart();
+  for(let i=0;i<7;i++){
+    const dd=new Date(ws);dd.setDate(dd.getDate()+i);
+    const key=dd.toISOString().split('T')[0];
+    const dow=dd.getDay();
+    const isToday=key===today();
+    const isWork=isWorkoutDay(dow,p.days);
+    const status=wl[key];
+    let cls='mini-day';
+    if(!isWork)cls+=' rest';
+    else if(status==='done')cls+=' done';
+    else if(key<today()&&isWork)cls+=' missed';
+    else cls+=' scheduled';
+    if(isToday)cls+=' today';
+    const el=document.createElement('div');
+    el.className=cls;
+    el.textContent=dd.getDate();
+    calDays.appendChild(el);
+  }
+
+  // Macro bars
+  const fl=getFoodLog();
+  const todayFood=fl.filter(f=>f.date===today());
+  const totalCal=todayFood.reduce((a,b)=>a+b.calories,0);
+  const totalProt=todayFood.reduce((a,b)=>a+(b.protein||0),0);
+  const targets=macroTargets(p);
+  const pct=(v,t)=>Math.min(100,Math.round(v/t*100));
+  document.getElementById('pb-cal').textContent=totalCal+' / '+targets.calories+' kcal';
+  document.getElementById('pf-cal').style.width=pct(totalCal,targets.calories)+'%';
+  document.getElementById('pb-prot').textContent=totalProt+'g / '+targets.protein+'g';
+  document.getElementById('pf-prot').style.width=pct(totalProt,targets.protein)+'%';
+  document.getElementById('pb-carb').textContent='— / '+targets.carbs+'g';
+  document.getElementById('pf-carb').style.width='0%';
+  document.getElementById('pb-fat').textContent='— / '+targets.fat+'g';
+  document.getElementById('pf-fat').style.width='0%';
+}
+
+function getWeekStart(){
+  const d=new Date();
+  const dow=d.getDay();
+  const diff=dow===0?-6:1-dow;
+  const ws=new Date(d);ws.setDate(d.getDate()+diff);ws.setHours(0,0,0,0);
+  return ws;
+}
+function calcStreak(p,wl){
+  let streak=0;
+  const d=new Date();d.setHours(0,0,0,0);
+  for(let i=0;i<90;i++){
+    const dd=new Date(d);dd.setDate(d.getDate()-i);
+    const key=dd.toISOString().split('T')[0];
+    const dow=dd.getDay();
+    if(!isWorkoutDay(dow,p.days))continue;
+    if(wl[key]==='done')streak++;
+    else break;
+  }
+  return streak;
+}
+function toggleCheck(key,el){
+  const c=getTodayChecks();
+  const wl=getWorkoutLog();
+  c[key]=!c[key];
+  saveTodayChecks(c);
+  el.classList.toggle('done',!!c[key]);
+  el.querySelector('.check-box').textContent=c[key]?'✓':'';
+
+  // Auto-mark workout as done if all checked
+  const todayKey=today();
+  const allKeys=Object.keys(c).filter(k=>k.startsWith(todayKey));
+  if(allKeys.length&&allKeys.every(k=>c[k])){
+    wl[todayKey]='done';
+    saveWorkoutLog(wl);
+    toast('Workout complete! 💪','green');
+  }
+  renderDashboard();
+}
+function markAllDone(){
+  const split=getTodaySplit();
+  if(!split){toast('Rest day — nothing to mark','');return;}
+  const exercises=getWorkoutExercises(split);
+  const checks=getTodayChecks();
+  const todayKey=today();
+  exercises.forEach((_,i)=>{checks[todayKey+'_'+i]=true;});
+  saveTodayChecks(checks);
+  const wl=getWorkoutLog();
+  wl[todayKey]='done';
+  saveWorkoutLog(wl);
+  toast('Workout logged! 🔥','green');
+  renderDashboard();
+}
+
+// ===== WORKOUT GENERATOR =====
+
+function getGoalScheme(goal){
+  const schemes={
+    Strength:{sets:5,reps:5,rest:'3-4 min'},
+    Bulky:{sets:4,reps:8,rest:'90 sec'},
+    Athletic:{sets:3,reps:12,rest:'60 sec'},
+    Lean:{sets:3,reps:15,rest:'45 sec'},
+    Toned:{sets:3,reps:15,rest:'45 sec'},
+    Endurance:{sets:2,reps:20,rest:'30 sec'}
+  };
+  return schemes[goal]||schemes.Athletic;
+}
+
+function buildWorkoutText(muscle,duration,equipment,goalOverride){
+  const p=getProfile();
+  const goal=goalOverride||(p?p.goal:'Athletic');
+  const scheme=getGoalScheme(goal);
+  const numExercises=duration<=30?4:duration<=45?5:duration<=60?6:8;
+  let pool=[];
+  const muscleMap={
+    Push:['Chest','Shoulders','Arms'],
+    Pull:['Back','Arms'],
+    Legs:['Legs','Core'],
+    Upper:['Chest','Back','Shoulders'],
+    Core:['Core'],
+    HIIT:['Core','Legs','Chest'],
+    'Full Body':['Chest','Back','Legs','Shoulders','Core']
+  };
+  const targets=muscleMap[muscle]||[muscle];
+  targets.forEach(m=>{
+    if(EXERCISES_DB[m]){
+      const filtered=EXERCISES_DB[m].filter(e=>{
+        if(equipment==='bodyweight')return e.equip.includes('bodyweight');
+        if(equipment==='dumbbells')return e.equip.includes('dumbbells');
+        return true;
+      });
+      pool=pool.concat(filtered.map(e=>({...e,muscle:m})));
+    }
+  });
+  if(pool.length===0)pool=EXERCISES_DB.Core.map(e=>({...e,muscle:'Core'}));
+  const selected=[];
+  const used=new Set();
+  while(selected.length<numExercises&&pool.length>0){
+    const idx=Math.floor(Math.random()*pool.length);
+    const ex=pool[idx];
+    if(!used.has(ex.name)){used.add(ex.name);selected.push(ex);}
+    pool.splice(idx,1);
+    if(pool.length===0)break;
+  }
+
+  let text='';
+  text+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  text+='  IRONFORGE — '+muscle.toUpperCase()+' DAY\n';
+  text+='  Goal: '+goal+' | '+duration+' min | '+equipment.toUpperCase()+'\n';
+  text+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+  text+='▶ WARM-UP (5 minutes)\n';
+  text+='  • 3 min light cardio (jumping jacks / jog)\n';
+  text+='  • Dynamic stretching for '+targets.join(', ')+'\n';
+  text+='  • 2 sets of activation exercises\n\n';
+  text+='▶ MAIN WORKOUT\n\n';
+  selected.forEach((ex,i)=>{
+    text+='  '+(i+1)+'. '+ex.name.toUpperCase()+'\n';
+    text+='     Sets: '+scheme.sets+' | Reps: '+scheme.reps+' | Rest: '+scheme.rest+'\n';
+    text+='     Muscle: '+ex.muscle+'\n\n';
+  });
+  text+='▶ COOL-DOWN (5 minutes)\n';
+  text+='  • Static stretching for all worked muscles\n';
+  text+='  • Hold each stretch 20-30 seconds\n';
+  text+='  • Deep breathing to lower heart rate\n\n';
+  text+='▶ COACH TIPS\n';
+  const tips={
+    Strength:'  • Add weight each week (progressive overload)\n  • Rest fully between sets — quality > speed\n  • Log every set to track progress',
+    Bulky:'  • Mind-muscle connection is everything\n  • Squeeze at the top of each rep\n  • Eat 300-500 kcal above maintenance',
+    Athletic:'  • Keep rest periods strict — use a timer\n  • Superset when possible to save time\n  • Add cardio 2-3x/week for conditioning',
+    Lean:'  • Minimal rest = elevated heart rate = fat burn\n  • Circuit training works great here\n  • Stay in a 300-500 kcal deficit',
+    Toned:'  • Higher volume with moderate weight\n  • Consistency beats intensity for toning\n  • Combine with 20 min cardio after',
+    Endurance:'  • Build aerobic base first\n  • Increase reps before increasing weight\n  • Cross-train with swimming or cycling'
+  };
+  text+=(tips[goal]||tips.Athletic)+'\n';
+  text+='\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  text+='  IRONFORGE — FORGE YOURSELF STRONGER\n';
+  text+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+  return text;
+}
+
+function generateWorkout(){
+  const muscle=document.getElementById('w-muscle').value;
+  const duration=+document.getElementById('w-duration').value;
+  const equipment=document.getElementById('w-equipment').value;
+  const text=buildWorkoutText(muscle,duration,equipment);
+  typewriter(document.getElementById('workout-output'),text);
+}
+function runPreset(preset){
+  const presetMap={Push:{muscle:'Push',dur:60},Pull:{muscle:'Pull',dur:60},Legs:{muscle:'Legs',dur:60},Upper:{muscle:'Upper',dur:45},Core:{muscle:'Core',dur:30},HIIT:{muscle:'HIIT',dur:30}};
+  const cfg=presetMap[preset];
+  const text=buildWorkoutText(cfg.muscle,cfg.dur,'full');
+  typewriter(document.getElementById('workout-output'),text);
+}
+
+// ===== DIET GENERATOR =====
+
+function generateDiet(){
+  const dietType=document.getElementById('d-type').value;
+  const budget=+document.getElementById('d-budget').value||150;
+  const allergyInput=document.getElementById('d-allergies').value.toLowerCase();
+  const allergens=allergyInput.split(',').map(a=>a.trim()).filter(Boolean);
+  const p=getProfile();
+  const targets=macroTargets(p);
+
+  function filterFood(arr){
+    return arr.filter(f=>{
+      if(!f.tags.includes(dietType)&&!(dietType==='veg'&&f.tags.includes('veg')))return false;
+      if(allergens.some(a=>f.allergens.some(fa=>fa.includes(a))))return false;
+      return true;
+    });
+  }
+
+  const pick=(arr,count=1)=>{
+    const filtered=filterFood(arr);
+    if(!filtered.length)return arr.slice(0,count);
+    const shuffled=[...filtered].sort(()=>Math.random()-.5);
+    return shuffled.slice(0,count);
+  };
+
+  const bf=pick(FOOD_DB.breakfast,1)[0]||FOOD_DB.breakfast[0];
+  const snack1=pick(FOOD_DB.snacks,1)[0]||FOOD_DB.snacks[0];
+  const ln=pick(FOOD_DB.lunch,1)[0]||FOOD_DB.lunch[0];
+  const snack2=pick(FOOD_DB.snacks.slice(3),1)[0]||FOOD_DB.snacks[3];
+  const dn=pick(FOOD_DB.dinner,1)[0]||FOOD_DB.dinner[0];
+
+  const totalCal=bf.cal+snack1.cal+ln.cal+snack2.cal+dn.cal;
+  const totalProt=bf.prot+snack1.prot+ln.prot+snack2.prot+dn.prot;
+  const totalCarbs=bf.carbs+snack1.carbs+ln.carbs+snack2.carbs+dn.carbs;
+  const totalFat=bf.fat+snack1.fat+ln.fat+snack2.fat+dn.fat;
+  const totalCost=bf.cost+snack1.cost+ln.cost+snack2.cost+dn.cost;
+
+  let text='';
+  text+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  text+='  IRONFORGE MEAL PLAN\n';
+  text+='  Diet: '+dietType.toUpperCase()+' | Budget: ₹'+budget+'/day\n';
+  text+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+
+  const fmt=(meal,time,food)=>time+' — '+food.name.toUpperCase()+'\n  Calories: '+food.cal+'kcal | Protein: '+food.prot+'g | Carbs: '+food.carbs+'g | Fat: '+food.fat+'g | Cost: ₹'+food.cost+'\n\n';
+  text+=fmt('bf','🌅 BREAKFAST (7:00 AM)',bf);
+  text+=fmt('sn1','🍎 MORNING SNACK (10:30 AM)',snack1);
+  text+=fmt('ln','☀️  LUNCH (1:00 PM)',ln);
+  text+=fmt('sn2','🥜 EVENING SNACK (4:30 PM)',snack2);
+  text+=fmt('dn','🌙 DINNER (8:00 PM)',dn);
+
+  text+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  text+='  DAILY TOTALS\n';
+  text+='  Calories: '+totalCal+'/'+targets.calories+'kcal\n';
+  text+='  Protein: '+totalProt+'g / Target: '+targets.protein+'g\n';
+  text+='  Carbs: '+totalCarbs+'g | Fat: '+totalFat+'g\n';
+  text+='  Total Cost: ₹'+totalCost+'/day\n\n';
+  if(totalCost>budget)text+='  ⚠️  Cost exceeds budget by ₹'+(totalCost-budget)+'. Consider swapping meals.\n';
+  else text+='  ✓ Within budget! Savings: ₹'+(budget-totalCost)+'\n';
+  text+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+  typewriter(document.getElementById('diet-output'),text);
+}
+
+// ===== FOOD LOG =====
+
+function addFoodLog(){
+  const name=document.getElementById('fl-name').value.trim();
+  const cal=+document.getElementById('fl-cal').value||0;
+  const prot=+document.getElementById('fl-prot').value||0;
+  if(!name){toast('Enter food name','');return;}
+  const fl=getFoodLog();
+  fl.push({name,calories:cal,protein:prot,date:today()});
+  saveFoodLog(fl);
+  document.getElementById('fl-name').value='';
+  document.getElementById('fl-cal').value='';
+  document.getElementById('fl-prot').value='';
+  renderFoodLog();
+  toast(name+' logged ✓','green');
+}
+function renderFoodLog(){
+  const fl=getFoodLog();
+  const todayFood=fl.filter(f=>f.date===today());
+  const list=document.getElementById('food-log-list');
+  if(!list)return;
+  list.innerHTML='';
+  todayFood.forEach((f,i)=>{
+    const el=document.createElement('div');
+    el.className='food-item';
+    el.innerHTML=`<div class="food-name">${f.name}</div><div class="food-cal">${f.calories}kcal</div><button class="food-del" onclick="delFood(${i})" title="Delete">✕</button>`;
+    list.appendChild(el);
+  });
+  const totalCal=todayFood.reduce((a,b)=>a+b.calories,0);
+  const totalProt=todayFood.reduce((a,b)=>a+(b.protein||0),0);
+  document.getElementById('fl-total-cal').textContent=totalCal;
+  document.getElementById('fl-total-prot').textContent=totalProt;
+}
+function delFood(idx){
+  const fl=getFoodLog();
+  const todayFood=fl.filter(f=>f.date===today());
+  const item=todayFood[idx];
+  const realIdx=fl.indexOf(item);
+  if(realIdx>-1)fl.splice(realIdx,1);
+  saveFoodLog(fl);
+  renderFoodLog();
+}
+
+// ===== SUPPLEMENTS =====
+
+function addSupp(){
+  const name=document.getElementById('supp-name').value.trim();
+  if(!name){toast('Enter supplement name','');return;}
+  const s=getSupps();s.push({name});
+  saveSupps(s);document.getElementById('supp-name').value='';
+  renderSupps();toast(name+' added ✓','green');
+}
+function renderSupps(){
+  const s=getSupps();
+  const list=document.getElementById('supp-list');
+  if(!list)return;
+  list.innerHTML='';
+  s.forEach((sup,i)=>{
+    const el=document.createElement('div');
+    el.className='supp-item';
+    el.innerHTML=`<div class="supp-name">💊 ${sup.name}</div><button class="supp-del" onclick="delSupp(${i})" title="Delete">✕</button>`;
+    list.appendChild(el);
+  });
+}
+function delSupp(idx){const s=getSupps();s.splice(idx,1);saveSupps(s);renderSupps();}
+
+// ===== PROGRESS =====
+
+function renderProgress(){
+  const p=getProfile();
+  const m=getMeasurements();
+  if(p){
+    const bmi=calcBMI(p);
+    const tdee=calcBMR(p);
+    document.getElementById('bmi-val').textContent=bmi;
+    document.getElementById('tdee-val').textContent=tdee;
+    const last=m[m.length-1];
+    if(last&&last.bf){
+      document.getElementById('bf-val').textContent=last.bf+'%';
+      document.getElementById('lm-val').textContent=calcLeanMass(last.weight||p.weight,last.bf);
+    } else {
+      document.getElementById('bf-val').textContent='—';
+      document.getElementById('lm-val').textContent='—';
+    }
+  }
+  renderWeightChart();
+  renderPBs();
+}
+function saveMeasurement(){
+  const entry={
+    date:today(),
+    weight:+document.getElementById('m-weight').value||0,
+    bf:+document.getElementById('m-bf').value||0,
+    chest:+document.getElementById('m-chest').value||0,
+    waist:+document.getElementById('m-waist').value||0,
+    arms:+document.getElementById('m-arms').value||0,
+    legs:+document.getElementById('m-legs').value||0
+  };
+  if(!entry.weight){toast('Enter weight','');return;}
+  const m=getMeasurements();m.push(entry);saveMeasurements(m);
+  toast('Measurement saved ✓','green');
+  renderProgress();
+}
+function renderWeightChart(){
+  const m=getMeasurements();
+  const recent=m.slice(-14);
+  const chart=document.getElementById('weight-chart');
+  if(!chart)return;
+  chart.innerHTML='';
+  if(!recent.length){chart.innerHTML='<p class="muted" style="font-size:12px;font-family:\'Barlow Condensed\',sans-serif;width:100%;text-align:center;align-self:center">No data yet — log measurements to see chart</p>';return;}
+  const maxW=Math.max(...recent.map(r=>r.weight));
+  const minW=Math.min(...recent.map(r=>r.weight));
+  const range=maxW-minW||1;
+  recent.forEach(r=>{
+    const pct=Math.max(5,Math.round((r.weight-minW)/range*90+5));
+    const wrap=document.createElement('div');
+    wrap.className='bar-wrap';
+    wrap.innerHTML=`<div class="bar-val">${r.weight}</div><div class="bar" style="height:${pct}%"></div><div class="bar-date">${r.date.slice(5)}</div>`;
+    chart.appendChild(wrap);
+  });
+}
+function addPB(){
+  const ex=document.getElementById('pb-ex').value.trim();
+  const kg=+document.getElementById('pb-kg').value||0;
+  if(!ex||!kg){toast('Enter exercise and weight','');return;}
+  const pbs=getPBs();
+  const existing=pbs.find(p=>p.ex.toLowerCase()===ex.toLowerCase());
+  if(existing){
+    if(kg>existing.kg){existing.kg=kg;existing.date=today();savePBs(pbs);toast('New PB! '+ex+': '+kg+'kg 🏆','gold');}
+    else{toast('Not a new PB (current: '+existing.kg+'kg)','');}
+  } else {
+    pbs.push({ex,kg,date:today()});savePBs(pbs);toast('PB added: '+ex+' '+kg+'kg','gold');
+  }
+  document.getElementById('pb-ex').value='';document.getElementById('pb-kg').value='';
+  renderPBs();
+}
+function renderPBs(){
+  const pbs=getPBs().sort((a,b)=>b.kg-a.kg);
+  const list=document.getElementById('pb-list');
+  if(!list)return;
+  list.innerHTML='';
+  if(!pbs.length){list.innerHTML='<p class="muted" style="font-size:13px;font-family:\'Barlow Condensed\',sans-serif">No PRs logged yet. Add your first personal best!</p>';return;}
+  pbs.forEach((pb,i)=>{
+    const el=document.createElement('div');
+    el.className='pb-item';
+    el.innerHTML=`<div class="pb-ex">${pb.ex}</div><div class="pb-weight">${pb.kg} kg</div><span class="muted" style="font-size:11px;font-family:'Barlow Condensed',sans-serif">${pb.date}</span><button class="pb-del" onclick="delPB(${i})" title="Delete">✕</button>`;
+    list.appendChild(el);
+  });
+}
+function delPB(idx){const pbs=getPBs();const sorted=pbs.sort((a,b)=>b.kg-a.kg);pbs.splice(pbs.indexOf(sorted[idx]),1);savePBs(pbs);renderPBs();}
+
+// ===== FINANCE =====
+
+function renderFinance(){
+  const p=getProfile();
+  document.getElementById('fin-gym').textContent='₹'+(p?p.gymFee:0);
+  const exp=getExpenses();
+  const now=new Date();
+  const monthExp=exp.filter(e=>{const d=new Date(e.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  const suppSpend=monthExp.filter(e=>e.category==='supplement').reduce((a,b)=>a+b.amount,0);
+  const ytd=exp.filter(e=>new Date(e.date).getFullYear()===now.getFullYear()).reduce((a,b)=>a+b.amount,0);
+  document.getElementById('fin-supp').textContent='₹'+suppSpend;
+  document.getElementById('fin-ytd').textContent='₹'+ytd;
+
+  // Budget bars
+  const gymFee=p?p.gymFee:0;const suppBudget=p?p.suppBudget:0;
+  const gymSpend=monthExp.filter(e=>e.category==='gym').reduce((a,b)=>a+b.amount,0);
+  const bars=document.getElementById('budget-bars');
+  if(bars){
+    bars.innerHTML='';
+    const makebar=(label,spend,budget,cls)=>{
+      const pct=budget>0?Math.min(100,Math.round(spend/budget*100)):0;
+      return `<div class="progress-bar-wrap"><div class="progress-bar-label"><span>${label}</span><span>₹${spend} / ₹${budget}</span></div><div class="progress-bar"><div class="progress-fill ${cls}" style="width:${pct}%"></div></div></div>`;
+    };
+    bars.innerHTML=makebar('Gym Fee',gymSpend,gymFee,'fill-red')+makebar('Supplements',suppSpend,suppBudget,'fill-gold');
+  }
+
+  // Log
+  const log=document.getElementById('expense-log');
+  if(log){
+    log.innerHTML='';
+    const sorted=[...exp].sort((a,b)=>new Date(b.date)-new Date(a.date));
+    sorted.forEach((e,i)=>{
+      const catColor={gym:'var(--red)',supplement:'var(--gold)',other:'var(--muted)'};
+      const el=document.createElement('div');
+      el.className='expense-item';
+      el.innerHTML=`<div class="expense-dot" style="background:${catColor[e.category]||'var(--muted)'}"></div><div class="expense-desc"><div class="expense-name">${e.desc}</div><div class="expense-cat">${e.category.toUpperCase()} • ${e.date}</div></div><div class="expense-amt" style="color:${catColor[e.category]||'var(--text)'}">₹${e.amount}</div><button class="expense-del" onclick="delExpense(${exp.indexOf(e)})" title="Delete">✕</button>`;
+      log.appendChild(el);
+    });
+    if(!sorted.length)log.innerHTML='<p class="muted" style="font-size:13px;font-family:\'Barlow Condensed\',sans-serif">No expenses logged yet.</p>';
+  }
+}
+function addExpense(){
+  const cat=document.getElementById('exp-cat').value;
+  const desc=document.getElementById('exp-desc').value.trim();
+  const amt=+document.getElementById('exp-amt').value||0;
+  if(!desc||!amt){toast('Enter description and amount','');return;}
+  const exp=getExpenses();
+  exp.push({category:cat,desc,amount:amt,date:today()});
+  saveExpenses(exp);
+  document.getElementById('exp-desc').value='';document.getElementById('exp-amt').value='';
+  renderFinance();toast('Expense added ✓','green');
+}
+function delExpense(idx){const exp=getExpenses();exp.splice(idx,1);saveExpenses(exp);renderFinance();}
+
+// ===== CALENDAR =====
+
+let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
+function calNav(dir){
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  renderCalendar();
+}
+function renderCalendar(){
+  const p=getProfile();
+  const days=p?p.days:5;
+  const wl=getWorkoutLog();
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-label').textContent=months[calMonth]+' '+calYear;
+
+  const grid=document.getElementById('cal-grid');
+  if(!grid)return;
+  // Headers
+  const heads=['MON','TUE','WED','THU','FRI','SAT','SUN'];
+  let html=heads.map(h=>`<div class="cal-day-head">${h}</div>`).join('');
+
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const offset=firstDay===0?6:firstDay-1;
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const todayStr=today();
+
+  for(let i=0;i<offset;i++)html+=`<div class="cal-day empty"></div>`;
+  let doneCount=0,missCount=0;
+  for(let d=1;d<=daysInMonth;d++){
+    const dd=new Date(calYear,calMonth,d);
+    const dow=dd.getDay();
+    const key=dd.toISOString().split('T')[0];
+    const isToday=key===todayStr;
+    const isWork=isWorkoutDay(dow,days);
+    const status=wl[key];
+    const isPast=key<todayStr;
+    let cls='cal-day',badge='';
+    if(isToday)cls+=' today';
+    if(!isWork){badge=`<span class="cal-badge badge-rest">REST</span>`;}
+    else if(status==='done'){cls+='';badge=`<span class="cal-badge badge-done">DONE</span>`;doneCount++;}
+    else if(isPast&&!status){badge=`<span class="cal-badge badge-missed">MISSED</span>`;missCount++;}
+    else{badge=`<span class="cal-badge badge-sched">SCHED</span>`;}
+    const splitName=getSplitForDow(dow,days);
+    html+=`<div class="${cls}" onclick="toggleCalDay('${key}','${isWork}')"><div class="cal-day-num">${d}</div>${badge}<div style="font-size:9px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;margin-top:2px">${splitName||''}</div></div>`;
+  }
+  grid.innerHTML=html;
+  document.getElementById('cal-done-cnt').textContent=doneCount;
+  document.getElementById('cal-miss-cnt').textContent=missCount;
+
+  // Week split sidebar
+  const splitList=document.getElementById('week-split-list');
+  if(splitList){
+    const split=SPLITS[days]||SPLITS[5];
+    const dayNames=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    splitList.innerHTML='';
+    dayNames.forEach((dayName,i)=>{
+      const dow=i+1;const s=split[dow];
+      const el=document.createElement('div');
+      el.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)';
+      el.innerHTML=`<span style="font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.5px;color:var(--muted)">${dayName}</span><span class="tag ${s?'tag-red':'tag-muted'}">${s||'REST'}</span>`;
+      splitList.appendChild(el);
+    });
+  }
+}
+function toggleCalDay(key,isWork){
+  if(isWork!=='true')return;
+  const wl=getWorkoutLog();
+  if(key>=today())return;
+  wl[key]=wl[key]==='done'?undefined:'done';
+  if(!wl[key])delete wl[key];
+  saveWorkoutLog(wl);
+  renderCalendar();
+}
+
+// ===== EXERCISE LIBRARY =====
+
+const EXERCISE_LIBRARY_DATA=[];
+Object.keys(EXERCISES_DB).forEach(muscle=>{
+  EXERCISES_DB[muscle].forEach(ex=>{
+    EXERCISE_LIBRARY_DATA.push({...ex,muscle});
+  });
+});
+
+function renderExercises(filter){
+  const grid=document.getElementById('exercise-library-grid');
+  if(!grid)return;
+  grid.innerHTML='';
+  const filtered=filter==='all'?EXERCISE_LIBRARY_DATA:EXERCISE_LIBRARY_DATA.filter(e=>e.muscle===filter);
+  filtered.forEach(ex=>{
+    const card=document.createElement('div');
+    card.className='exercise-card';
+    card.innerHTML=`<div class="ex-name">${ex.name}</div><span class="tag tag-red" style="margin-bottom:10px">${ex.muscle}</span><div class="ex-desc">${ex.desc}</div>`;
+    grid.appendChild(card);
+  });
+}
+function filterExercises(filter,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderExercises(filter);
+}
+
+// ===== INIT =====
+
+window.addEventListener('DOMContentLoaded',()=>{
+  loadTheme();
+  fillSetupFromProfile();
+  const p=getProfile();
+  if(p){goPage('dashboard');}
+  else{goPage('about');}  // New users see the Guide first
+});
+</script>
+</body>
+</html>
